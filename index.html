@@ -1,0 +1,202 @@
+<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content:"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover"><meta name="theme-color" content="#eaca49"><meta name="format-detection" content="telephone=no"><meta name="msapplication-tap-highlight" content="no"><title>AttnSheet</title><meta name="google-signin-client_id" content="YOUR_API_KEY.apps.googleusercontent.com"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="apple-touch-icon" href="static/icons/apple-touch-icon.png"><link rel="icon" href="static/icons/favicon.png"><link rel="manifest" href="/manifest.json"><link href="css/app.css" rel="stylesheet"></head><body><div id="app"><div class="views tabs safe-areas"><div class="toolbar toolbar-bottom tabbar-labels"><div class="toolbar-inner"><a href="#view-catalog" class="tab-link"><i class="icon f7-icons if-not-md">chart_bar_square_fill</i> <i class="icon material-icons if-md">insert_chart_outlined</i> <span class="tabbar-label">Dashboard</span> </a><a href="#view-home" class="tab-link tab-link-active"><i class="icon f7-icons if-not-md">square_list_fill</i> <i class="icon material-icons if-md">view_list</i> <span class="tabbar-label">Attendance</span> </a><a href="#view-settings" class="tab-link"><i class="icon f7-icons if-not-md">gear</i> <i class="icon material-icons if-md">settings</i> <span class="tabbar-label">Settings</span></a></div></div><div id="view-home" class="view view-main view-init tab tab-active" data-url="/"></div><div id="view-catalog" class="view view-init tab" data-view="catalog" data-url="/dashboard/"></div><div id="view-settings" class="view view-init tab" data-view="settings" data-url="/settings/"></div></div></div><script>//logins & stuffs
+    function postLogin(){
+      var profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+      if(localStorage.lastLogin != profile.getEmail())
+      {
+        localStorage.clear();
+        localStorage.setItem("lastLogin",profile.getEmail());
+        window.app.f7.toast.create({text: 'By using this app, you agree to the license of AttnSheet. You also agree with license, privacy policy & terms (if any) of Framework7 & Google.', closeTimeout: 5000,}).open();
+        window.app.f7.methods.syncAppData(true);
+      }
+      document.getElementById('accInfo').innerHTML = `
+    <img src="`+profile.getImageUrl()+`">
+    <p>`+profile.getName()+` (`+profile.getEmail()+`) </p>
+    `;
+    document.getElementById('g-login-bttn').innerHTML = `
+    <a href="#" class="col button button button-fill button-raised color-red" id="g-logout-bttn" onclick="handleSignOutClick()">Logout</a>
+    `;
+    }
+
+    function postLogout() {
+      document.getElementById('accInfo').innerHTML = "";
+      document.getElementById('g-login-bttn').innerHTML = `<a href="#" class="col button button-large button-fill button-raised color-green" id="g-signin" onclick="handleSignInClick()">Login</a>`;
+    }
+
+    function initClient() {
+    var API_KEY = 'YOUR_API_KEY';  // TODO: Update placeholder with desired API key.
+
+    var CLIENT_ID = 'YOUR_CLIENT_ID';  // TODO: Update placeholder with desired client ID.
+    var SCOPE = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata';
+
+    gapi.client.init({
+      'apiKey': API_KEY,
+      'clientId': CLIENT_ID,
+      'scope': SCOPE,
+      'discoveryDocs': ['https://sheets.googleapis.com/$discovery/rest?version=v4', 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+    }).then(function() {
+      gapi.auth2.getAuthInstance().isSignedIn.listen(updateSignInStatus);
+      updateSignInStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+    });
+
+    }
+
+    function handleClientLoad() {
+      gapi.load('client:auth2', initClient);
+      // gapi.load('client:picker', onPickerApiLoad);
+    }
+
+    function updateSignInStatus(isSignedIn) {
+      if (isSignedIn) {
+        postLogin();
+      }
+    }
+
+    function handleSignInClick(event) {
+      gapi.auth2.getAuthInstance().signIn();
+    }
+
+    function handleSignOutClick(event) {
+      gapi.auth2.getAuthInstance().signOut();
+      console.log("Logged out");
+      postLogout();
+    }
+    
+    //class create
+
+    function createClass (form) {
+      if(!window.app.f7.online)
+      {
+        window.app.f7.dialog.alert('Device Offline!');
+        return;
+      }
+      if(!gapi.auth2.getAuthInstance().isSignedIn.get())
+      {
+        window.app.f7.dialog.alert('Please Sign In!');
+        return;
+      }
+      let level = form.elements["level"].value;
+      let dept = form.elements["dept"].value;
+      let degree = form.elements["degree"].value;
+      let sem = form.elements["sem"].value;
+      let year = form.elements["yr"].value;
+      let alias = form.elements["alias"].value;
+      let subj = form.elements["subject"].value;
+      var title = form.elements["sheetTitle"].value;
+      if(title == "")
+      {
+        title = subj+"_"+dept+"_"+sem+"_"+year+"_"+degree+"_"+level;
+      }
+      if(sem=="" || subj=="")
+      {
+        window.app.f7.dialog.alert('Please Fill Up All The Required Fields');
+        return;
+      }
+      if(alias=="") {
+        alias = degree + "/" + dept + "/" + sem + "/" + year + "/" + subj;
+      }
+      console.log(title);
+      var spreadsheetBody = {
+        "properties": {
+          "title": title
+        },
+        "sheets": [
+          {
+            "properties": {
+              "title": "Attendance",
+              "index": 0
+            }
+          },
+          {
+            "properties": {
+              "title": "Routine",
+              "index": 1
+            }
+          },
+          {
+            "properties": {
+              "title": "Topics",
+              "index": 2
+            }
+          },
+          {
+            "properties": {
+              "title": "Report",
+              "index": 3
+            }
+          }
+        ]
+      };
+      let data1 = [[level,degree,dept,"Semester : " + sem,"Batch Of : "+year,"Subject : "+subj, gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()],["NEXT","=ADDRESS(3,1+COUNTA(5:5),4)","DO NOT CHANGE ROW 2,3,4,5","Attendance of : ",new Date().getFullYear(),null,null],["LAST","=ADDRESS(5+COUNTA(A6:A),1+COUNTA(5:5),4)","Records Taken","=SUM(H4:4)","Total Students","=COUNTA(A6:A)","Total Present"],[null,null,null,null,null,null,"Class Repeat"],["Sl. No.","Name","ID","Remarks","Label","Total","Percentage"],[null,null,null,null,null,"=SUM(H6:6)","=ROUNDUP(($F6/$D$3)*100,2)"]];
+      let data2 = [["Report","From","mm/dd/yyyy","To","mm/dd/yyyy",null,null],["Alloted",`=SUMIFS(Attendance!4:4,Attendance!$5:$5,">="&$C$1,Attendance!$5:$5,"<="&$E$1)`,"Taken","=B2-F2","NFP",`=SUMIFS(Attendance!4:4,Attendance!$5:$5,">="&$C$1,Attendance!$5:$5,"<="&$E$1,Attendance!$3:$3,"=0")`,null],["Sl. No","Name","ID","Attn","Bonus","Total","%"],[`=QUERY(Attendance!A6:C,"SELECT * WHERE A>0")`,null,null,"=F4-E4",`=SUMIFS(Attendance!6:6,Attendance!$5:$5,">="&$C$1,Attendance!$5:$5,"<="&$E$1,Attendance!$2:$2,"=B")`,`=SUMIFS(Attendance!6:6,Attendance!$5:$5,">="&$C$1,Attendance!$5:$5,"<="&$E$1)`,"=ROUNDUP((F4/($D$2+E4))*100,2)",null]];
+      window.app.f7.methods.createSpreadsheet(spreadsheetBody, alias, data1, data2);
+      window.app.f7.views.current.router.back();
+    }
+
+    function addClass(id) {
+      if(!window.app.f7.online)
+      {
+        window.app.f7.dialog.alert('Device Offline!');
+        return;
+      }
+      if(!gapi.auth2.getAuthInstance().isSignedIn.get())
+      {
+        window.app.f7.dialog.alert('Please Sign In!');
+        return;
+      }
+      let form = document.getElementById('addSheetIDBOX');
+      let url = 'https://docs.google.com/spreadsheets/d/'+id;
+      let alias = form.elements["alias"].value;
+      if(alias=="") {
+        alias = id;
+      }
+      let arr = JSON.parse(localStorage.getItem("rooms"));
+      if(arr==null)
+      {
+        arr = [];
+      }
+      arr.push({alias: alias, id: id, url: url});
+      localStorage.setItem("rooms",JSON.stringify(arr));
+      localStorage.setItem("lastUpdate",JSON.stringify(new Date()));
+      window.app.f7.dialog.alert('Class Added!');
+      window.app.f7.methods.syncAppData();
+      window.app.f7.views.current.router.back();
+    }
+    
+
+    window.deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      window.deferredPrompt = e;
+      try{
+        showInstallPromotion();
+      }
+      finally{
+        console.log("Enable Installation");
+      }
+      document.getElementById("installPWABTTN").classList.remove("disabled");
+    });
+
+    document.addEventListener('backbutton', function(){
+    window.app.f7.views.current.router.back();
+    return false;
+    });
+
+    window.addEventListener("message", e => {
+      if(e.origin == window.location.origin)
+      {
+        if(e.data == "atr")
+        {
+          window.pickerPop.postMessage(gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token, window.location.origin);
+        }
+        else if(e.data == "authCancel")
+        {
+          window.pickerPop.close();
+        }
+        else if(e.data)
+        {
+          console.log(e.data);
+          addClass(e.data);
+          window.pickerPop.close();
+        }
+      }
+    },false);</script><script async defer="defer" src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()" onreadystatechange="if (this.readyState === 'complete') this.onload()"></script><script src="js/app.js"></script></body></html>
+    
