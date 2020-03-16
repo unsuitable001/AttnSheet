@@ -1,4 +1,5 @@
 # AttnSheet
+
 A simple, lightweight, progressive, cross-platform attendance management system integrated with Google Services.
 
 ## USAGE
@@ -7,7 +8,14 @@ A simple, lightweight, progressive, cross-platform attendance management system 
 
 Create a project on Google Developer Console. Enable Google Sheets API, Google Drive API, Google File Picker API. Configure OAuth Consent Screen. Use `https://www.googleapis.com/auth/drive.file` and `https://www.googleapis.com/auth/drive.appdata` scopes.
 
-Get your credentials and put them in appropriate position `(i.e in place of placeholders e.g YOUR_API_KEY, YOUR_APP_ID)` in `index.html` and `picker.html` file.
+Get your credentials and put them in appropriate position `(i.e in place of placeholders e.g YOUR_API_KEY, YOUR_APP_ID)` in `index.html` and `picker.html` file located in `/src`.
+
+## BUILD
+
+* 🔥 `start` - run development server
+* 🔧 `dev` - run development server
+* 🔧 `build-dev` - build web app using development mode (faster build without minification and optimization)
+* 🔧 `build-prod` - build web app for production
 
 ## DEMO (It's static due to the absence of credentials)
 

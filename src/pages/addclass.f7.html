@@ -1,0 +1,110 @@
+<template>
+<div class="page">
+    <div class="navbar">
+    <div class="navbar-bg"></div>
+    <div class="navbar-inner sliding">
+        <div class="left">
+        <a href="#" class="back link">
+            <i class="icon icon-back"></i>
+            <span class="if-not-md">Back</span>
+        </a>
+        </div>
+        <div class="title">Add Class</div>
+    </div>
+    </div>
+    <div class="page-content">
+    <div class="block block-strong">
+    <div class="list no-hairlines-md">
+        <form class="list" id="addSheetIDBOX">
+        <ul>
+        <!-- <li>
+        <div class="item-content item-input">
+            <div class="item-inner">
+                <div class="item-title item-label">Google Sheets URL</div>
+                <div class="item-input-wrap">
+                <input name="url" type="text" placeholder="e.g. https://docs.google.com/spreadsheets/d/2yDuRYrRtOvjEm7b4sAfCC1Nr80VkkEuJ9b_nX25-C98/edit#gid=1827351863"/>
+                </div>
+            </div>
+        </div>
+        </li> -->
+        <li>
+        <div class="item-content item-input">
+        <div class="item-inner">
+            <div class="item-title item-label">Class Name (only visible to you)</div>
+            <div class="item-input-wrap">
+            <input name="alias" type="text" placeholder="e.g. Maths - CSE - Sem 1 - 2019"/>
+            </div>
+        </div>
+        </div>
+        </li>
+        </ul>
+        </form>
+        <div class="block">
+        <a href="#" class="col button button-large button-fill button-raised color-green" @click="addClass">Pick Spreadsheet & Add Class</a>
+        </div>
+    </div>
+    </div>
+    </div>
+</div>
+</template>
+<script>
+export default {
+    methods: {
+        addClass: function(data) {
+            if(!window.app.f7.online)
+            {
+                window.app.f7.dialog.alert('Device Offline!');
+                return;
+            }
+            if(!gapi.auth2.getAuthInstance().isSignedIn.get())
+            {
+                window.app.f7.dialog.alert('Please Sign In!');
+                return;
+            }
+            // window.pickerUrl = '/picker.html?token='+gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
+            window.pickerPop = window.open('/picker','_blank');
+            // addClass();
+            // let form = document.getElementById('addSheetIDBOX');
+            // // var url = "";
+            // // if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+            // // var doc = data[google.picker.Response.DOCUMENTS][0];
+            // // url = doc[google.picker.Document.URL];
+            // // }
+            // // if(url == "")
+            // // {
+            // //     window.app.f7.dialog.alert('Please Select A File!');
+            // //     return;
+            // // }
+            // let url = form.elements["url"].value;
+            // let alias = form.elements["alias"].value;
+            // if(alias=="") {
+            //     alias = degree + "/" + dept + "/" + sem + "/" + year + "/" + subj;
+            // }
+            // let id = new RegExp("/spreadsheets/d/([a-zA-Z0-9-_]+)").exec(url)[1];
+            // let arr = JSON.parse(localStorage.getItem("rooms"));
+            // let l = arr.length;
+            // arr.push({alias: alias, id: id, url: url});
+            // localStorage.setItem("rooms",JSON.stringify(arr));
+            // localStorage.setItem("lastUpdate",JSON.stringify(new Date()));
+            // this.$root.syncAppData();
+            // window.app.f7.views.current.router.back();
+            // window.open('/picker.html?token='+gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token,'_blank');
+        },
+        // createPicker: function() {
+        // var oauthToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token
+        // if (window.pickerApiLoaded && oauthToken) {
+        //   var picker = new google.picker.PickerBuilder().
+        //       addView(google.picker.ViewId.SPREADSHEETS).
+        //       setAppId('75282435926').
+        //       setOAuthToken(oauthToken).
+        //       setDeveloperKey('iaSGS-q2UMsHR2diDpSiKcO-').
+        //       setCallback(self.addClass).
+        //       build();
+        //   picker.setVisible(true);
+        // }
+
+        // }
+    }
+};
+</script>
+      

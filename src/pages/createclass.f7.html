@@ -1,0 +1,135 @@
+<template>
+<div class="page" data-name="createClass">
+  <div class="navbar">
+    <div class="navbar-bg"></div>
+    <div class="navbar-inner sliding">
+      <div class="left">
+        <a href="#" class="link back">
+          <i class="icon icon-back"></i>
+          <span class="if-not-md">Back</span>
+        </a>
+      </div>
+      <div class="title">Create Class</div>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="block-title">Create A New Class</div>
+    <div class="block block-strong">
+      <div class="list no-hairlines-md">
+        <form class="list" id="create-class-form">
+        <ul>
+          <li>
+            <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Subject</div>
+                <div class="item-input-wrap">
+                  <input name="subject" type="text" placeholder="e.g. Mathematics - I"/>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Level</div>
+                <div class="item-input-wrap">
+                  <select name="level">
+                    <option>UG</option>
+                    <option>PG</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+          <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Degree</div>
+                <div class="item-input-wrap">
+                  <select name="degree">
+                    {{#each $root.degrees}}
+                    <!-- <option>B.Tech</option>
+                    <option>B.Sc</option>
+                    <option>B.Com</option>
+                    <option>B.A</option>
+                    <option>M.Sc</option>
+                    <option>M.Com</option> -->
+                    <option>{{this}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+          <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Department</div>
+                <div class="item-input-wrap">
+                  <select name="dept">
+                    {{#each $root.departments}}
+                    <!-- <option>CSE</option>
+                    <option>CSE (TCS)</option>
+                    <option>ECE</option>
+                    <option>DepartmentX</option>
+                    <option>DepartmentY</option> -->
+                    <option>{{this}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Semester</div>
+                <div class="item-input-wrap">
+                  <input name="sem" type="number" placeholder="e.g. 2" min="1" max="10"/>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Batch's Starting Year</div>
+                <div class="item-input-wrap">
+                  <input name="yr" type="number" placeholder="YYYY" min="2018" max="9999"/>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Class Name (only visible to you - optional)</div>
+                <div class="item-input-wrap">
+                  <input name="alias" type="text" placeholder="e.g. Maths - CSE - Sem 1 - 2019"/>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Name in Google Sheets (optional) </div>
+                <div class="item-input-wrap">
+                  <input name="sheetTitle" type="text" placeholder="e.g. Maths - CSE - Sem 1 - 2019"/>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      </form>
+    <div class="block">
+        <a href="#" class="col button button-large button-fill button-raised color-green" id="createclassbttn" onclick="createClass(document.getElementById('create-class-form'));">Create Class</a>
+        <p>You will be redirected to Google Sheets. There you can add routine, remarks, separate attendace sheet for every subject in specified format.</p>
+    </div>
+  </div>
+</div>
+</template>
+<script>
+export default {};
+</script>

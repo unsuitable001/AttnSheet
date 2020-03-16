@@ -1,0 +1,90 @@
+<template>
+<div class="page" data-name="settings">
+  <div class="navbar">
+    <div class="navbar-bg"></div>
+    <div class="navbar-inner sliding">
+      <div class="title">Settings</div>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="block-title">Account</div> 
+    <div class="block block-strong">
+      <div class="page-content" id="accInfo">
+      </div>
+      <p class="row" id="g-login-bttn">
+          <a href="#" class="col button button-large button-fill button-raised color-green" id="g-signin" onclick="handleSignInClick()">Login</a>
+      </p>
+    </div>
+    <div class="block-title">Classes</div>
+    <div class="block block-strong">
+      <p class="row">
+        <a href="/addclass/" class="col button button-raised button-fill">Add Class</a>
+        <a href="/newclass/" class="col button button button-fill button-raised color-green" id="create-class-bttn">Create Class</a>
+      </p>
+    </div>
+    <div class="list links-list">
+      <ul>
+          <li><a class="link external" href="/help.pdf">Help</a></li>
+          <li><a href="/license/">License</a></li>
+          <li><a href="/about/">About</a></li>
+      </ul>
+    </div>
+    <div class="block-title">App</div>
+    <div class="block block-strong">
+      <a href="#" class="col button button-raised color-orange" id="syncdataBTTN" @click="syncData">Restore App Data</a>
+      <br>
+      <a href="#" class="col button button-raised color-green disabled" id="installPWABTTN" @click="addPWA">Install App</a>
+      <br>
+      <a href="#" class="col button button-raised color-red" @click="forceUpdate">Force Update</a>
+    </div>
+    <p class="footer text-align-center disabled">AttnSheet by Soumyadip Mondal<br>Version : 1.0RC9</p>
+  </div>
+</div>
+</template>
+<script>
+export default {
+  methods: {
+    addPWA: function() {
+      try {
+      window.deferredPrompt.prompt();
+      window.deferredPrompt.userChoice.then((choiceResult) => {
+        if(choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
+        } else {
+          console.log('User dismissed the A2HS prompt');
+        }
+        window.deferredPrompt = null;
+      });
+    }
+    catch(TypeError) {
+      this.$app.dialog.alert("Can't install now. For iOS devices : Go to SHARE > ADD TO HOME SCREEN");
+    }
+    },
+    syncData: function() {
+      if(!window.app.f7.online)
+      {
+          window.app.f7.dialog.alert('Device Offline!');
+          return;
+      }
+      if(!gapi.auth2.getAuthInstance().isSignedIn.get())
+      {
+          window.app.f7.dialog.alert('Please Sign In!');
+          return;
+      }
+      this.$app.toast.create({text: 'Syncing App Data', closeTimeout: 2000,}).open();
+      window.app.f7.methods.syncAppData(true);
+    },
+    forceUpdate: function() {
+      if('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (let registration of registrations) {
+            registration.update().then(()=> {
+              window.location.reload(true);
+            });
+          };
+        });
+      };
+    }
+  }
+};
+</script>

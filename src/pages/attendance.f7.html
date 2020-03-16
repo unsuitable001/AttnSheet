@@ -1,0 +1,178 @@
+<template>
+<div class="page" data-name="attendancePage">
+    <div class="navbar">
+    <div class="navbar-bg"></div>
+    <div class="navbar-inner sliding">
+        <div class="left">
+        <a href="#" class="link back">
+            <i class="icon icon-back"></i>
+            <span class="if-not-md">Back</span>
+        </a>
+        </div>
+        <div class="title">Attendance Sheet</div>
+    </div>
+    </div>
+    <div class="page-content">
+    <div class="block block-strong">
+    <div class="list">
+    <ul>
+        <li>
+        <div class="item-content item-input">
+            <div class="item-inner">
+            <div class="item-title item-label">No. Of Consecutive Classes</div>
+            <div class="item-input-wrap">
+                <input id="conclassmul" name="conClass" type="number" placeholder="e.g. 2" min="1" max="10" value="1"/>
+            </div>
+            </div>
+        </div>
+        </li>
+        <li>
+        <div class="item-content item-input">
+            <div class="item-inner">
+            <div class="item-title item-label">Today's Topic</div>
+            <div class="item-input-wrap">
+                <input id="topicName" name="TopicEntry" type="text"/>
+            </div>
+            </div>
+        </div>
+        </li>
+        {{js "this.$route.query.bonus == 'true' ? '<p>Exclude : </p>' : ''"}}
+    {{#each data}}
+        <li>
+        <label class="item-checkbox item-content">
+            <input type="checkbox" name="{{this}}" value="{{this}}"  @click="attnArray({{@index}})"/>
+            <i class="icon icon-checkbox"></i>
+            <div class="item-inner">
+            <div class="item-title">{{this}}</div>
+            </div>
+        </label>
+        </li>
+    {{/each}}
+    </ul>
+    </div>
+    <a href="#" class="col button button-large button-fill button-raised color-green" @click="pushAttendance">Save Attendance</a>
+    </div>
+</div>
+</template>
+<script>
+export default {
+    data: function () {
+        if(!window.app.f7.online)
+        {
+            window.app.f7.dialog.alert('Device Offline!');
+            return;
+        }
+        if(!gapi.auth2.getAuthInstance().isSignedIn.get())
+        {
+            window.app.f7.dialog.alert('Please Sign In!');
+            return;
+        }
+        this.$app.preloader.show();
+        window.componentVar = this;
+        // let x = this.$root.pullDataFromSheet(this.$route.params.id,"Attendance!B4:B200","COLUMNS");
+        // console.log(x);
+        // this.$root.helloWorld();
+        // this.$app.preloader.hide();
+        // return {data: [1,2,3,4,5]};
+        var params = {
+        // The ID of the spreadsheet to retrieve data from.
+        spreadsheetId: this.$route.params.id,  // TODO: Update placeholder value.
+
+        // The A1 notation of the values to retrieve.
+        range: "Attendance!B2:B200",  // TODO: Update placeholder value.
+        majorDimension: "COLUMNS",
+
+        // How values should be represented in the output.
+        // The default render option is ValueRenderOption.FORMATTED_VALUE.
+        // valueRenderOption: '',  // TODO: Update placeholder value.
+
+        // // How dates, times, and durations should be represented in the output.
+        // // This is ignored if value_render_option is
+        // // FORMATTED_VALUE.
+        // // The default dateTime render option is [DateTimeRenderOption.SERIAL_NUMBER].
+        // dateTimeRenderOption: '',  // TODO: Update placeholder value.
+        };
+
+        var request = gapi.client.sheets.spreadsheets.values.get(params);
+        request.then(function(response) {
+        // console.log(response.result.values[0]);
+        window.app.f7.preloader.hide();
+        window.present = 0;
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        window.tempAttnStart = response.result.values[0][0];
+        window.tempAttnEnd = response.result.values[0][1];
+        response.result.values[0].splice(0,4);
+        console.log(response.result.values[0]);
+        window.colID = window.tempAttnStart.slice(0,-1);
+        if(window.componentVar.$route.query.bonus != "true")
+        {
+            window.tempattnArray = new Array(response.result.values[0].length+4).fill(0);
+            window.tempattnArray[0] = null;
+        }
+        else
+        {
+            window.tempattnArray = new Array(response.result.values[0].length+4).fill("="+window.colID+"4");
+            document.getElementById("topicName").value = "Bonus";
+            window.tempattnArray[0] = "B";
+            window.present = response.result.values[0].length;
+        }
+        window.tempattnArray[1] = `=COUNTIF(`+window.colID+`6:`+window.colID+`,">0")`;
+        window.tempattnArray[2] = 1;
+        window.tempattnArray[3] = mm + "/" + dd;
+        console.log(window.tempattnArray);
+        // window.CLmultiplier = document.getElementById("conclassmul");
+        // console.log(window.CLmultiplier);
+        window.componentVar.$setState({
+            data: response.result.values[0],
+        });
+        // TODO: Change code below to process the `response` object:
+        }, function(reason) {
+        console.error('error: ' + reason.result.error.message);
+        });
+    },
+    methods: {
+        pushAttendance: function()
+        {
+            window.tempattnArray[2] = document.getElementById("conclassmul").value;
+            console.log(window.tempattnArray);
+            this.$app.preloader.show();
+            let range = "Attendance!"+window.colID+"2"+":"+window.tempAttnEnd;
+            console.log(range);
+            let topic = document.getElementById("topicName").value;
+            let bonus = null;
+            if(this.$route.query.bonus == "true")
+            {
+                bonus = "B";
+            }
+            this.$root.pushDataToSheet(this.$route.params.id,[window.tempattnArray],"COLUMNS",range);
+            this.$root.pushDataToSheet(this.$route.params.id,[[window.tempattnArray[3],window.tempattnArray[2],topic]],"ROWS","Topics",'APPEND');
+            this.$app.dialog.alert("Attendance Taken! Present : "+window.present+" Out of "+(window.tempattnArray.length-4));
+            window.app.f7.views.current.router.back();
+            window.tempAttnEnd = undefined;
+            window.tempAttnStart = undefined;
+            window.tempattnArray = undefined;
+            window.present = undefined;
+            window.colID = undefined;
+
+        },
+        attnArray: function(i)
+        {
+            console.log("Clicked");
+            i+=4;
+            if(window.tempattnArray[i] == 0)
+            {
+                window.present++;
+                // window.tempattnArray[i] = window.CLmultiplier.value;
+                window.tempattnArray[i] = "="+window.colID+"4";
+            }
+            else
+            {
+                window.present--;
+                window.tempattnArray[i] = 0;
+            }
+        }
+    }
+};
+</script>

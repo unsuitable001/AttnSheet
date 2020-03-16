@@ -1,0 +1,58 @@
+<template>
+  <div class="page" data-name="home">
+    <!-- Top Navbar -->
+    <div class="navbar navbar-large">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <!-- <div class="left">
+          <a href="#" class="link icon-only panel-open" data-panel="left">
+            <i class="icon f7-icons if-not-md">menu</i>
+            <i class="icon material-icons if-md">menu</i>
+          </a>
+        </div> -->
+        <div class="title sliding">AttnSheet</div>
+        <div class="title-large">
+          <div class="title-large-text">AttnSheet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollable page content-->
+    <div class="page-content ptr-content" data-ptr-mousewheel="true" @ptr:refresh="reload">
+      <div class="ptr-preloader">
+        <div class="preloader"></div>
+        <div class="ptr-arrow"></div>
+      </div>
+      <!-- Add/Remove room/class -->
+      <div class="list links-list">
+        <ul>
+          {{#each rooms}}
+            <li><a href="/class/{{id}}/?index={{@index}}&title={{alias}}">{{alias}}</a></li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  export default {
+    data: function () {
+      if(!localStorage.notfirstRun) {
+        this.$app.toast.create({text: "By using this app, you are accepting the Privacy Policy & License of AttnSheet, Framework7 & Google (and other product(s) assositated with it.", closeTimeout: 5000,}).open();
+        localStorage.notfirstRun = true;
+      }
+      return {
+        rooms: JSON.parse(localStorage.getItem("rooms")),
+      };
+    },
+    methods: {
+      reload: function(e, done) {
+        let x = JSON.parse(localStorage.getItem("rooms"));
+        this.$setState({
+          rooms: x
+        });
+        done();
+      }
+    }
+  };
+</script>
