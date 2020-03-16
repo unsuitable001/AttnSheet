@@ -1,12 +1,12 @@
 {
   "name": "attnsheet",
-  "private": true,
-  "version": "1.0.0",
+  "private": false,
+  "version": "1.0.9",
   "description": "AttnSheet",
   "repository": "",
-  "license": "MIT",
+  "license": "CC-BY-NC-SA 3.0 Unported",
   "framework7": {
-    "cwd": "/mnt/0B7B05A60B7B05A6/Dev-Env/Attandace-Management-System/AttnSheet",
+    "cwd": "./AttnSheet",
     "type": [
       "pwa",
       "web"
